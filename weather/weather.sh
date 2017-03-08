@@ -116,17 +116,21 @@ isServiceAvailable () {
 #
 getWeatherfile () {
 
-    local CURL_ARGS="-s -o $WEATHER_FILE_DOWNLOADED $URL"
+    # local CURL_ARGS="-s -o $WEATHER_FILE_DOWNLOADED $URL"
 
-    curl $CURL_ARGS # >/dev/null 2>&1
+    # curl $CURL_ARGS # >/dev/null 2>&1
 
-    local res=$?
+    # local res=$?
 
-    ([ $res -eq 0 ] && [ -s "$WEATHER_FILE_DOWNLOADED" ]) && {
+    # ([ $res -eq 0 ] && [ -s "$WEATHER_FILE_DOWNLOADED" ]) && {
 
-        cp "$WEATHER_FILE_DOWNLOADED" "$WEATHER_FILE"
+        # cp "$WEATHER_FILE_DOWNLOADED" "$WEATHER_FILE"
 
-    }
+    # }
+	
+	/mnt/us/weather/bin/weather-script.sh "$WEATHER_FILE"
+	
+	local res=$?
 
     echo $res
 
