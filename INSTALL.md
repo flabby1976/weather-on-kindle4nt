@@ -1,3 +1,5 @@
+## TO BE UPDATED!!
+
 ## Installation
 
 Copy the 'weather' and the 'kite' directories onto your Kindle's SD card.
