@@ -8,14 +8,13 @@ from pytz import timezone
 from tzlocal import get_localzone 
 import textwrap
 
+# This restores the same behavior as before.
+import ssl
+context = ssl._create_unverified_context()
+
 # get local timezone    
 localtz = get_localzone() 
 print(localtz)
-
-import ssl
-
-# This restores the same behavior as before.
-context = ssl._create_unverified_context()
 
 utctz = timezone('UTC')
 midnight_utc=time(0,0,0,tzinfo=utctz)

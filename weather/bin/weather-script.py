@@ -77,6 +77,8 @@ curr_temp = dom.getElementsByTagName('currentConditions')[0].getElementsByTagNam
 curr_temp = str(int(round(float(curr_temp))))
 curr_code = dom.getElementsByTagName('currentConditions')[0].getElementsByTagName('iconCode')[0].childNodes[0].data
 curr_icon = dict[curr_code]
+feel_temp = dom.getElementsByTagName('currentConditions')[0].getElementsByTagName('windChill')[0].childNodes[0].data
+feel_temp = str(int(round(float(feel_temp))))
 
 #Get weather forecast elements
 xml_forecasts = dom.getElementsByTagName('forecastGroup')[0].getElementsByTagName('forecast')
@@ -119,6 +121,7 @@ for i in range(days-1):
 output = codecs.open('weather-script-preprocess.svg', 'r', encoding='utf-8').read()
 
 output = output.replace('CURR_TEMP',curr_temp)
+output = output.replace('FEEL_TEMP',feel_temp)
 
 # Insert icons and temperatures
 output = output.replace('ICON_ONE',icons[0]).replace('ICON_TWO',icons[1]).replace('ICON_THREE',icons[2]).replace('ICON_FOUR',icons[3])

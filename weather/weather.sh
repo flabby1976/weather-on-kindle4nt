@@ -128,8 +128,23 @@ getWeatherfile () {
 
     # }
 	
-	/mnt/us/weather/bin/weather-script.sh "$WEATHER_FILE"
+	# /mnt/us/weather/bin/weather-script.sh "$WEATHER_FILE"
 	
+	#input is weather-script-preprocess.svg
+	#output is weather-script-output.svg
+	python weather-script.py
+
+	mv weather-script-output.svg template-agenda.svg
+
+	#input is template-agenda.svg
+	#output is almost_done.svg
+	python parse_ical.py
+
+	mv almost_done.svg weather-script-output.svg
+
+	$BIN_DIR/rsvg-convert --background-color=white -o weather-script-output.png weather-script-output.svg
+	$BIN_DIR/pngcrush -qf -c 0 weather-script-output.png "$WEATHER_FILE"
+
 	local res=$?
 
     echo $res
