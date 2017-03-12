@@ -128,22 +128,14 @@ getWeatherfile () {
 
     # }
 	
-	# /mnt/us/weather/bin/weather-script.sh "$WEATHER_FILE"
+	#/mnt/us/weather/bin/weather-script.sh "$WEATHER_FILE"
 	
-	#input is weather-script-preprocess.svg
-	#output is weather-script-output.svg
-	python weather-script.py
+	python "$BIN_DIR/weather-script.py" "$BASE/img/weather-script-preprocess.svg" "$TMP_DIR/weather-script-output.svg"
 
-	mv weather-script-output.svg template-agenda.svg
+	python "$BIN_DIR/parse_ical.py" "$TMP_DIR/weather-script-output.svg" "$TMP_DIR/ical-script-output.svg"
 
-	#input is template-agenda.svg
-	#output is almost_done.svg
-	python parse_ical.py
-
-	mv almost_done.svg weather-script-output.svg
-
-	$BIN_DIR/rsvg-convert --background-color=white -o weather-script-output.png weather-script-output.svg
-	$BIN_DIR/pngcrush -qf -c 0 weather-script-output.png "$WEATHER_FILE"
+	/mnt/us/weather/bin/rsvg-convert --background-color=white -o "$TMP_DIR/ical-script-output.png" "$TMP_DIR/ical-script-output.svg"
+	/mnt/us/weather/bin/pngcrush -qf -c 0 "$TMP_DIR/ical-script-output.png" "$WEATHER_FILE"
 
 	local res=$?
 

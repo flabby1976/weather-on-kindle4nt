@@ -53,6 +53,11 @@ dict = {'00': 'fair',
 '43': 'wind',
 '44': 'smoke'}
 
+import sys
+# get filenames
+infile = sys.argv[1]
+outfile = sys.argv[2]
+
 #Num days to extract
 days=4
 
@@ -118,7 +123,7 @@ for i in range(days-1):
 #
 
 # Open SVG to process
-output = codecs.open('weather-script-preprocess.svg', 'r', encoding='utf-8').read()
+output = codecs.open(infile, 'r', encoding='utf-8').read()
 
 output = output.replace('CURR_TEMP',curr_temp)
 output = output.replace('FEEL_TEMP',feel_temp)
@@ -132,4 +137,4 @@ output = output.replace('LOW_ONE',str(lows[0])).replace('LOW_TWO',str(lows[1])).
 output = output.replace('DAY_THREE',dates[2]).replace('DAY_FOUR',dates[3])
 
 # Write output
-codecs.open('weather-script-output.svg', 'w', encoding='utf-8').write(output)
+codecs.open(outfile, 'w', encoding='utf-8').write(output)

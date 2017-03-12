@@ -1,20 +1,25 @@
 from icalendar import Calendar
 import datetime
 from datetime import time, timedelta
-import urllib
+import urllib2
 import codecs
 import dateutil.rrule as rrule
 from pytz import timezone
 from tzlocal import get_localzone 
 import textwrap
 
-# This restores the same behavior as before.
-import ssl
-context = ssl._create_unverified_context()
+import sys
+# get filenames
+infile = sys.argv[1]
+outfile = sys.argv[2]
 
 # get local timezone    
 localtz = get_localzone() 
-print(localtz)
+
+import ssl
+
+# This restores the same behavior as before.
+context = ssl._create_unverified_context()
 
 utctz = timezone('UTC')
 midnight_utc=time(0,0,0,tzinfo=utctz)
@@ -22,18 +27,13 @@ midnight_local=time(0,0,0,tzinfo=localtz)
 
 myday = datetime.datetime.now(localtz).date() 
 
-print(myday)
-
 start = datetime.datetime(myday.year, myday.month, myday.day, tzinfo=localtz)
 end = start + timedelta(1)
 nextweek = start + timedelta(7)
 
-print(start.isoformat(' '), end.isoformat(' '), nextweek.isoformat(' '))
-
-
 ICAL_URLS = [
-			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-xxxxxxxxxxxxxxxxxxxxxxxxx/basic.ics",
-			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/basic.ics",
+			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-260e60145fc3e588bb08ba3af578d851/basic.ics",
+			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-2547d742be3bf3dc1d168761482c244a/basic.ics",
 			"https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
 			"https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
 			"http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1",
@@ -44,10 +44,11 @@ future=[]
 
 for ICAL_URL in ICAL_URLS:
 
-	print(ICAL_URL)
-	urllib.urlretrieve (ICAL_URL, "basic.ics", context=context)
+#	urllib.urlretrieve (ICAL_URL, "basic.ics", context=context)
+#	cal = Calendar.from_ical(open('basic.ics','rb').read())
 
-	cal = Calendar.from_ical(open('basic.ics','rb').read())
+	cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
+	cal = Calendar.from_ical(cal_xml)
 
 	for component in cal.walk('vevent'):
 
@@ -67,6 +68,7 @@ for ICAL_URL in ICAL_URLS:
 		except KeyError:
 			date_end = date_start
 		duration = date_end.timetuple().tm_yday - date_start.timetuple().tm_yday
+		print(duration)
 		if all_day:
 			 duration-=1
 		
@@ -107,7 +109,7 @@ for ICAL_URL in ICAL_URLS:
 agenda = sorted(agenda, key=lambda k: k['when']) 
 future = sorted(future, key=lambda k: k['when']) 
 
-output = codecs.open('template-agenda.svg', 'r', encoding='utf-8').read()
+output = codecs.open(infile, 'r', encoding='utf-8').read()
 
 display_lines=[]
 
@@ -137,7 +139,6 @@ for count in range(16):
 	output = output.replace('agenda' + str(count) + ':','')
 
 
-
-# Write output
-codecs.open('almost_done.svg', 'w', encoding='utf-8').write(output)
+	# Write output
+codecs.open(outfile, 'w', encoding='utf-8').write(output)
 
