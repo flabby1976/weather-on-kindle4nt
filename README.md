@@ -19,7 +19,7 @@ _Before_ that you have to jailbreak the Kindle and to install the [USBNetwork Ha
 You have to install python on the kindle - also at (https://www.mobileread.com/forums/showthread.php?t=88004).
 and then two modules -
 
-python -m ensurepip
-/mnt/us/python/bin/pip install icalendar
-/mnt/us/python/bin/pip install tzdata
+python -m ensurepip 
+/mnt/us/python/bin/pip install icalendar 
+/mnt/us/python/bin/pip install tzdata 
 
