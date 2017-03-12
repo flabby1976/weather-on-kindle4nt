@@ -32,8 +32,8 @@ end = start + timedelta(1)
 nextweek = start + timedelta(7)
 
 ICAL_URLS = [
-			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-260e60145fc3e588bb08ba3af578d851/basic.ics",
-			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-2547d742be3bf3dc1d168761482c244a/basic.ics",
+			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-xxxxxxxx/basic.ics",
+			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-xxxxxxxx/basic.ics",
 			"https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
 			"https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
 			"http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1",
