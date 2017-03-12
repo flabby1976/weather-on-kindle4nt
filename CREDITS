@@ -1,9 +1,6 @@
-[Matthew Petroff]
-Many thanks for his great inspiration and their publication.
+Inspired by Matthew Petroff's Kindle Weather Display project https://github.com/mpetroff/kindle-weather-display. The weather icons, the SVG file file method of building the weather display image and the conversion to PNG for the kindle are all taken from this project.
 
-http://www.mpetroff.net/archives/2012/09/14/kindle-weather-display
+Draws heavily from https://github.com/ufuchs/weather-on-kindle4nt, which itself implements the kindle-side functions from https://github.com/mpetroff/kindle-weather-display but puts the kindle to sleep between display updates, rather than using cron, which means it can run on battery for weeks/months without charging! Also this implementation uses kite to start/stop the program, so the kindle can still be used as an e-reader as required. Most of the shell scripts are taken directly from this project, with relatively minor changes. 
 
-[Jennifer]
-Thank you for your idea with the status/update line and all the other helpfully hints.
+Also draws from https://github.com/scolby33/weather_kindle, which implements the server-side functions from https://github.com/mpetroff/kindle-weather-display on the kindle itself, thus making a completely standalone kindle weather display. The executables pngcrush and rsvg-convert as well as the associated lib files in weather/lib, which allow the generation of the weather display image on the kindle, are taken directly from this project
 
-http://www.shatteredhaven.com/2012/11/1347365-kindle-weather-display.html
