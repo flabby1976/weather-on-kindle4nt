@@ -32,23 +32,29 @@ end = start + timedelta(1)
 nextweek = start + timedelta(7)
 
 ICAL_URLS = [
-			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-xxxxxxxx/basic.ics",
-			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-xxxxxxxx/basic.ics",
-			"https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
-			"https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
-			"http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1",
-			]
+                        "https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-260e60145fc3e588bb08ba3af578d851/basic.ics",
+                        "https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-2547d742be3bf3dc1d168761482c244a/basic.ics",
+                        "https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
+                        "https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
+                        "http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1",
+                        ]
 
 agenda=[]
 future=[]
 
 for ICAL_URL in ICAL_URLS:
 
-#	urllib.urlretrieve (ICAL_URL, "basic.ics", context=context)
-#	cal = Calendar.from_ical(open('basic.ics','rb').read())
+	print(ICAL_URL)
 
-	cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
-	cal = Calendar.from_ical(cal_xml)
+	try:
+		cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
+	except urllib2.HTTPError:
+		continue # skip URL with errors
+	
+	try:
+		cal = Calendar.from_ical(cal_xml)
+	except ValueError:
+		continue # skip files with errors
 
 	for component in cal.walk('vevent'):
 
@@ -68,7 +74,7 @@ for ICAL_URL in ICAL_URLS:
 		except KeyError:
 			date_end = date_start
 		duration = date_end.timetuple().tm_yday - date_start.timetuple().tm_yday
-		print(duration)
+
 		if all_day:
 			 duration-=1
 		
@@ -88,7 +94,7 @@ for ICAL_URL in ICAL_URLS:
 				if not test_date:
 					continue  #No instances of this recurring event in our window, so go to next event
 		except KeyError:
-			pass
+			pass #Not recurring
 
 		test_event = {'when': test_date, 'what': component.decoded("SUMMARY"), 'all day': not ( type(date_start) is datetime.datetime )}
 		test_events.append(test_event)
