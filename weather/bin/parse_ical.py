@@ -15,6 +15,8 @@ outfile = sys.argv[2]
 
 # get local timezone    
 localtz = get_localzone() 
+localtz=timezone('America/Toronto')
+print(localtz)
 
 import ssl
 
@@ -32,8 +34,8 @@ end = start + timedelta(1)
 nextweek = start + timedelta(7)
 
 ICAL_URLS = [
-                        "https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-260e60145fc3e588bb08ba3af578d851/basic.ics",
-                        "https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-2547d742be3bf3dc1d168761482c244a/basic.ics",
+			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-691485f58d82d77af2ca4cb2bf7596fe/basic.ics",
+			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-1248d69aa31dd34af3b749e8d09daa22/basic.ics",
                         "https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
                         "https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
                         "http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1",
@@ -44,7 +46,7 @@ future=[]
 
 for ICAL_URL in ICAL_URLS:
 
-	print(ICAL_URL)
+#	print(ICAL_URL)
 
 	try:
 		cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
@@ -82,6 +84,7 @@ for ICAL_URL in ICAL_URLS:
 		try:
 			x = date_start.tzinfo
 			test_date=date_start.astimezone(localtz)
+#			print(test_date)
 		except AttributeError: 
 			test_date = datetime.datetime.combine(date_start,midnight_local) 
 
