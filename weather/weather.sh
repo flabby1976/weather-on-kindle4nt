@@ -24,6 +24,7 @@ WLAN_UNAVAILABLE=2
 SERVICE_UNAVAILABLE=8
 WEATHER_OUTDATED=16
 
+PLEASE_WAIT_PNG="$BASE/img/please-wait.png"
 FLIGHTMODE_ON_PNG="$BASE/img/flightmode-on.png"
 WLAN_UNAVAILABLE_PNG="$BASE/img/wlan-unavailable.png"
 SERVICE_UNAVAILABLE_PNG="$BASE/img/service-unavailable.png"
@@ -202,6 +203,7 @@ printInfoScreen () {
 #
 #
 init () {
+	printScreen "$PLEASE_WAIT_PNG"
 
     weatherProperties_init "$BASE/weather.conf"
 
