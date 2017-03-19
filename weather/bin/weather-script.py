@@ -58,6 +58,15 @@ import sys
 infile = sys.argv[1]
 outfile = sys.argv[2]
 
+#get options
+import yaml
+configs = yaml.safe_load(file('weather.conf.new','r'))
+#Code of my city
+CODE = configs['CODE']
+
+#url for Environment Canada
+url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/" + CODE + ".xml"
+
 #Num days to extract
 days=4
 
@@ -66,12 +75,6 @@ dates = [None]*days
 highs = [None]*days
 lows = [None]*days
 icons = [None]*days
-
-#Code of my city
-CODE = "ON/s0000430_e"
-
-#url for Environment Canada
-url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/" + CODE + ".xml"
 
 #read the weather XML
 weather_xml = urllib2.urlopen(url).read()
@@ -82,8 +85,12 @@ curr_temp = dom.getElementsByTagName('currentConditions')[0].getElementsByTagNam
 curr_temp = str(int(round(float(curr_temp))))
 curr_code = dom.getElementsByTagName('currentConditions')[0].getElementsByTagName('iconCode')[0].childNodes[0].data
 curr_icon = dict[curr_code]
-feel_temp = dom.getElementsByTagName('currentConditions')[0].getElementsByTagName('windChill')[0].childNodes[0].data
-feel_temp = str(int(round(float(feel_temp))))
+
+try:
+	feel_temp = dom.getElementsByTagName('currentConditions')[0].getElementsByTagName('windChill')[0].childNodes[0].data
+	feel_temp = str(int(round(float(feel_temp))))
+except IndexError:
+	feel_temp = '**'
 
 #Get weather forecast elements
 xml_forecasts = dom.getElementsByTagName('forecastGroup')[0].getElementsByTagName('forecast')

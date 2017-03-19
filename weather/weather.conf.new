@@ -1,0 +1,31 @@
+# Weather data taken from the 'Environment and Climate Change Canada' citypage weather XML files
+# http://dd.weatheroffice.ec.gc.ca/citypage_weather/docs/README_citypage_weather.txt
+#
+# The codes for the supported cities are given in 
+# http://dd.weatheroffice.ec.gc.ca/citypage_weather/docs/site_list_provinces_en.csv
+# 
+# Code for my city 
+#
+CODE: 'ON/s0000430_e'
+
+# These are the URLs for the ical feeds that will be displayed on the agenda
+#
+ICAL_URLS:
+# My google calendar
+- "https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-e941508097fc476450447c15534fb229/basic.ics"
+# Robinson Family google calendar
+- "https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-709c9b7749e5decac851c51fb75044eb/basic.ics"
+# Hull City AFC Fixtures
+- "https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics"
+# Ottawa garbage collection schedule ffor my street
+- "https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640"
+# Public Holidays in Ontario
+- "http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1"
+
+# This is the timezone that the agenda will be displayed in.
+# Format is as the IANA time zone database.
+# https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+#
+localtz: 'Canada/Eastern'
+#localtz: 'UTC'
+

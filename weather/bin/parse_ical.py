@@ -12,22 +12,25 @@ import sys
 infile = sys.argv[1]
 outfile = sys.argv[2]
 
-# set local timezone
-localtz=timezone('America/Toronto')
-start=datetime.datetime.now(localtz)
-localtz=start.tzinfo
-
 import ssl
 import cgi
 
-# This restores the same behavior as before.
+# This allows the kindle to access https:// 
 context = ssl._create_unverified_context()
+
+#get options
+import yaml
+configs = yaml.safe_load(file('weather.conf.new','r'))
+ICAL_URLS = configs['ICAL_URLS']
+localtz=timezone(configs['localtz'])
+
+# set local timezone
+start=datetime.datetime.now(localtz)
+localtz=start.tzinfo
 
 utctz = timezone('UTC')
 midnight_utc=time(0,0,0,tzinfo=utctz)
 midnight_local=time(0,0,0,tzinfo=localtz)
-
-midnight_local
 
 start = datetime.date.today()
 start = datetime.datetime.combine(start, midnight_local)
@@ -38,13 +41,6 @@ print(start)
 end = start + timedelta(1)
 nextweek = start + timedelta(21)
 
-ICAL_URLS = [
-        	"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-xxx/basic.ics",
-		"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-xxx/basic.ics",
-             "https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
-            "https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
-            "http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1"
-			]
 agenda=[]
 
 for ICAL_URL in ICAL_URLS:
@@ -113,8 +109,7 @@ for ICAL_URL in ICAL_URLS:
 			if( test_event['when'].timetuple().tm_year == start.timetuple().tm_year ):
 				if( test_event['when'].timetuple().tm_yday >= start.timetuple().tm_yday ) and (test_event['when'].timetuple().tm_yday <= nextweek.timetuple().tm_yday ):
 					agenda.append(test_event)
-					f=test_event['when']
-					print(float(f.hour)/24,test_event, duration)
+					print(test_event)
 
 #sort by date
 agenda = sorted(agenda, key=lambda k: k['when']) 
@@ -147,7 +142,6 @@ for lines in display_lines:
 
 for count in range(16):
 	output = output.replace('agenda' + str(count) + ':','')
-
 
 	# Write output
 codecs.open(outfile, 'w', encoding='utf-8').write(output)
