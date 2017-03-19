@@ -5,7 +5,6 @@ import urllib2
 import codecs
 import dateutil.rrule as rrule
 from pytz import timezone
-from tzlocal import get_localzone 
 import textwrap
 
 import sys
@@ -13,12 +12,13 @@ import sys
 infile = sys.argv[1]
 outfile = sys.argv[2]
 
-# get local timezone    
-localtz = get_localzone() 
+# set local timezone
 localtz=timezone('America/Toronto')
-print(localtz)
+start=datetime.datetime.now(localtz)
+localtz=start.tzinfo
 
 import ssl
+import cgi
 
 # This restores the same behavior as before.
 context = ssl._create_unverified_context()
@@ -27,32 +27,33 @@ utctz = timezone('UTC')
 midnight_utc=time(0,0,0,tzinfo=utctz)
 midnight_local=time(0,0,0,tzinfo=localtz)
 
-myday = datetime.datetime.now(localtz).date() 
+midnight_local
 
-start = datetime.datetime(myday.year, myday.month, myday.day, tzinfo=localtz)
+start = datetime.date.today()
+start = datetime.datetime.combine(start, midnight_local)
+
+print(start)
+
+#start = datetime.datetime(myday.year, myday.month, myday.day, tzinfo=localtz)
 end = start + timedelta(1)
-nextweek = start + timedelta(7)
+nextweek = start + timedelta(21)
 
 ICAL_URLS = [
-			"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-691485f58d82d77af2ca4cb2bf7596fe/basic.ics",
-			"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-1248d69aa31dd34af3b749e8d09daa22/basic.ics",
-                        "https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
-                        "https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
-                        "http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1",
-                        ]
-
+        	"https://calendar.google.com/calendar/ical/flabby1976%40gmail.com/private-xxx/basic.ics",
+		"https://calendar.google.com/calendar/ical/robinsons.family.2013%40gmail.com/private-xxx/basic.ics",
+             "https://calendar.google.com/calendar/ical/7d5tsh19o5m9r4qbtibld2hhc0%40group.calendar.google.com/public/basic.ics",
+            "https://recollect.net/api/places/0870DEC8-20DB-11E2-9E4B-940FC465FF45/services/208/events.en.ics?t=1485747640",
+            "http://www.kayaposoft.com/enrico/ics/v1.0?country=can&fromDate=01-01-2017&toDate=31-12-2017&region=Ontario&en=1"
+			]
 agenda=[]
-future=[]
 
 for ICAL_URL in ICAL_URLS:
-
-#	print(ICAL_URL)
 
 	try:
 		cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
 	except urllib2.HTTPError:
 		continue # skip URL with errors
-	
+
 	try:
 		cal = Calendar.from_ical(cal_xml)
 	except ValueError:
@@ -75,11 +76,11 @@ for ICAL_URL in ICAL_URLS:
 			date_end = component.decoded('DTEND')
 		except KeyError:
 			date_end = date_start
-		duration = date_end.timetuple().tm_yday - date_start.timetuple().tm_yday
+		duration = date_end.timetuple().tm_yday - date_start.timetuple().tm_yday # fix me! Need to do this calc in local TZ not UTC
 
 		if all_day:
 			 duration-=1
-		
+
 	#Need the start date to be TZ aware. If it isn't add dummy
 		try:
 			x = date_start.tzinfo
@@ -104,7 +105,7 @@ for ICAL_URL in ICAL_URLS:
 
 		for day_count in range(duration):
 			next = datetime.datetime.combine(test_date.date(),midnight_local)+timedelta(day_count+1)
-			test_event = {'when': next, 'what': component.decoded("SUMMARY")+" ("+ str(day_count+2)+"/"+str(duration+1)+")", 'all day': True}
+			test_event = {'when': next, 'what': component.decoded("SUMMARY")+" (Day "+ str(day_count+2)+"/"+str(duration+1)+")", 'all day': True}
 			test_events.append(test_event)
 
 	#Check if event is within our window of interest
@@ -112,11 +113,11 @@ for ICAL_URL in ICAL_URLS:
 			if( test_event['when'].timetuple().tm_year == start.timetuple().tm_year ):
 				if( test_event['when'].timetuple().tm_yday >= start.timetuple().tm_yday ) and (test_event['when'].timetuple().tm_yday <= nextweek.timetuple().tm_yday ):
 					agenda.append(test_event)
-					print(test_event, duration)
+					f=test_event['when']
+					print(float(f.hour)/24,test_event, duration)
 
 #sort by date
 agenda = sorted(agenda, key=lambda k: k['when']) 
-future = sorted(future, key=lambda k: k['when']) 
 
 output = codecs.open(infile, 'r', encoding='utf-8').read()
 
@@ -135,10 +136,10 @@ for try_event in agenda:
 		agenda_entry  = try_event['when'].strftime("%H:%M") + ': ' +  try_event['what']
 
 	display_lines += textwrap.fill(agenda_entry, width=30, initial_indent='', subsequent_indent='  ').splitlines()
-				
+
 count = 0
 for lines in display_lines:
-	output = output.replace('agenda' + str(count) + ':', lines)
+	output = output.replace('agenda' + str(count) + ':', cgi.escape(lines))
 	print lines
 	count+=1
 	if (count == 50):

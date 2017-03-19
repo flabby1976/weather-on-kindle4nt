@@ -135,7 +135,7 @@ getWeatherfile () {
 
 	python "$BIN_DIR/parse_ical.py" "$TMP_DIR/weather-script-output.svg" "$TMP_DIR/ical-script-output.svg"
 
-	/mnt/us/weather/bin/rsvg-convert --background-color=white -o "$TMP_DIR/ical-script-output.png" "$TMP_DIR/ical-script-output.svg"
+	/mnt/us/weather/bin/rsvg-convert --background-color=white -f png -o "$TMP_DIR/ical-script-output.png" "$TMP_DIR/ical-script-output.svg"
 	/mnt/us/weather/bin/pngcrush -qf -c 0 "$TMP_DIR/ical-script-output.png" "$WEATHER_FILE"
 
 	local res=$?
