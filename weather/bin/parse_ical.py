@@ -13,7 +13,7 @@ def make_local(test_date):
         new_date=test_date.astimezone(localtz)
     except AttributeError: 
         new_date = datetime.datetime.combine(test_date,midnight_local)
-    print new_date
+#    print new_date
     return new_date
 
 import sys
@@ -142,8 +142,9 @@ for try_event in agenda:
 
 count = 0
 for lines in display_lines:
-    output = output.replace('agenda' + str(count) + ':', cgi.escape(lines))
+    lines=lines.decode('utf-8')
     print lines
+    output = output.replace('agenda' + str(count) + ':', cgi.escape(lines))
     count+=1
     if (count == 50):
         break
