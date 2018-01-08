@@ -10,7 +10,8 @@ weather-on-kindle4nt
   (So you can take away your 'weather station' in the pub and show it all your friends.)
 - The temporary files are written in the '/tmp' directory which is a temporary filesystem(32M), living in the memory
 
-__Note__  
+## Installing
+
 Starting from a new Kindle 4NT -
 1) Copy the 'weather' directory from this repository to the Kindle's USB drive's root
 2) 'Jailbreak' the kindle by following https://wiki.mobileread.com/wiki/Kindle4NTHacking#Jailbreak
