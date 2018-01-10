@@ -27,7 +27,6 @@ WEATHER_OUTDATED=16
 PLEASE_WAIT_PNG="$BASE/img/please-wait.png"
 FLIGHTMODE_ON_PNG="$BASE/img/flightmode-on.png"
 WLAN_UNAVAILABLE_PNG="$BASE/img/wlan-unavailable.png"
-SERVICE_UNAVAILABLE_PNG="$BASE/img/service-unavailable.png"
 WEATHER_OUTDATED_PNG="$BASE/img/weather-outdated.png"
 
 . "$BIN_DIR/weatherProperties.sh"
@@ -43,7 +42,6 @@ getFileAge () {
 
 }
 
-#
 #
 #
 isWeatherFileOutDated () {
@@ -96,41 +94,11 @@ calcUpdateIntervall () {
 
 }
 
-# checks the availability of a weather file on server.
-# this function doesn't provide any information if this weather file is 
-# outdated or not!  
-#
-# @param1 string url  download url to the weatherfile
-# @return integer   1, a weather file is available on server
-#                   0, the weather file doesn't exist  
-#
-isServiceAvailable () {
-
-    local CURL_ARGS="-s -I $URL"
-    curl $CURL_ARGS | head -n1 | grep -i 200 >/dev/null 2>&1
-    echo $?
-
-}
-
 #
 #
 #
 getWeatherfile () {
 
-    # local CURL_ARGS="-s -o $WEATHER_FILE_DOWNLOADED $URL"
-
-    # curl $CURL_ARGS # >/dev/null 2>&1
-
-    # local res=$?
-
-    # ([ $res -eq 0 ] && [ -s "$WEATHER_FILE_DOWNLOADED" ]) && {
-
-        # cp "$WEATHER_FILE_DOWNLOADED" "$WEATHER_FILE"
-
-    # }
-	
-	#/mnt/us/weather/bin/weather-script.sh "$WEATHER_FILE"
-	
 	python "$BIN_DIR/weather-script.py" "$BASE/img/weather-script-preprocess.svg" "$TMP_DIR/weather-script-output.svg"
 
 	python "$BIN_DIR/parse_ical.py" "$TMP_DIR/weather-script-output.svg" "$TMP_DIR/ical-script-output.svg"
@@ -159,10 +127,6 @@ checkPrerequests () {
         res=$WLAN_UNAVAILABLE
     }
 
-    [ $(isServiceAvailable "$URL") -ne 0 ] && {
-        res=$SERVICE_UNAVAILABLE
-    }
-
     echo $res
 
 }
@@ -180,9 +144,6 @@ errCodeToImgFilename () {
             ;;
         $WLAN_UNAVAILABLE )
             echo "$WLAN_UNAVAILABLE_PNG"
-            ;;
-        $SERVICE_UNAVAILABLE )
-            echo "$SERVICE_UNAVAILABLE_PNG"
             ;;
         $WEATHER_OUTDATED )
             echo "$WEATHER_OUTDATED_PNG"
@@ -206,9 +167,6 @@ init () {
 	printScreen "$PLEASE_WAIT_PNG"
 
     weatherProperties_init "$BASE/weather.conf"
-
-    # Location aus conf-File wandeln
-    URL="http://$DOWNLOAD_IP"
 
     mkdir -p "$WEATHER_FILE_DIR" > /dev/null
 
@@ -297,7 +255,7 @@ while :; do
             STATE=$WAIT
             ;;
 
-        # take a nape
+        # take a nap
         $WAIT )
 
             $WAITSTRATEGY $sec
