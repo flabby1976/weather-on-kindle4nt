@@ -18,10 +18,12 @@ Starting from a new Kindle 4NT -
 3) Install USBhacks and test ability to get ssh access to kindle by following http://www.shatteredhaven.com/2012/11/1337365-ssh-on-kindle-4-usbnetwork-hack.html. 
 4) Install python from https://www.mobileread.com/forums/showthread.php?t=88004.
 5) logon to kindle via ssh and install three python modules -
-		python -m ensurepip
-		/mnt/us/python/bin/pip install icalendar
-		/mnt/us/python/bin/pip install tzdata
-		/mnt/us/python/bin/pip install pyyaml
+```
+	python -m ensurepip
+	/mnt/us/python/bin/pip install icalendar
+	/mnt/us/python/bin/pip install tzdata
+	/mnt/us/python/bin/pip install pyyaml
+```
 6) The weather app can be tested by running /mnt/us/weather/weather.sh. 
 Configuration options are set in the files 'weather.conf' and 'weather.conf.new' in the 'weather' directory in the Kindle's USB drive's root.
 
