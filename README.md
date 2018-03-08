@@ -24,7 +24,10 @@ Starting from a new Kindle 4NT -
 	/mnt/us/python/bin/pip install tzdata
 	/mnt/us/python/bin/pip install pyyaml
 ```
-6) The weather app can be tested by running /mnt/us/weather/weather.sh. 
+6) The weather app can be tested by running 
+```
+/mnt/us/weather/weather.sh
+```
 Configuration options are set in the files 'weather.conf' and 'weather.conf.new' in the 'weather' directory in the Kindle's USB drive's root.
 
 To get the easy launcher from the kindle home screen
