@@ -28,7 +28,7 @@ Starting from a new Kindle 4NT -
 ```
 	/mnt/us/weather/weather.sh
 ```
-Configuration options are set in the files 'weather.conf' and 'weather.conf.new' in the 'weather' directory in the Kindle's USB drive's root.
+	Configuration options are set in the files 'weather.conf' and 'weather.conf.new' in the 'weather' directory in the Kindle's USB drive's root.
 
 To get the easy launcher from the kindle home screen
 1) Copy the 'kite' directory from this repository to the Kindle's USB drive's root
