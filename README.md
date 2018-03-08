@@ -1,6 +1,8 @@
 weather-on-kindle4nt
 =====================
 
+https://github.com/flabby1976/weather-on-kindle4nt/wiki
+
 ## Features
 
 - The original function as an ebook reader remains
