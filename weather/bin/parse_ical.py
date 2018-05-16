@@ -44,7 +44,7 @@ midnight_local=time(0,0,0,tzinfo=localtz)
 start = datetime.date.today()
 start = datetime.datetime.combine(start, midnight_local)
 
-print(start)
+print("Start: ", start)
 
 #start = datetime.datetime(myday.year, myday.month, myday.day, tzinfo=localtz)
 end = start + timedelta(1)
@@ -53,6 +53,8 @@ nextweek = start + timedelta(21)
 agenda=[]
 
 for ICAL_URL in ICAL_URLS:
+
+    print("Downloading: ", ICAL_URL)
 
     try:
         cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
@@ -65,6 +67,8 @@ for ICAL_URL in ICAL_URLS:
     except ValueError:
         continue # skip files with errors
 
+    print("Download successfull")
+
     for component in cal.walk('vevent'):
 
         test_events=[]
@@ -74,6 +78,8 @@ for ICAL_URL in ICAL_URLS:
             what=component.decoded("SUMMARY")
         except KeyError:
             continue # goes to next component in cal.walk
+
+        print(what)
 
     #Get the start date/time of the event and duration (if spans more than one days)
         date_start = component.decoded('DTSTART')
@@ -96,9 +102,15 @@ for ICAL_URL in ICAL_URLS:
     #Check if the event is recurring. If so find the startdate of the occurance immediately after the start of our window of interest
         try:
             if component['RRULE']:
-                z=component['RRULE'].to_ical()
+                rule_string=component['RRULE'].to_ical()
+                print("recurring: ", rule_string)
                 seq_start=test_date
-                test_date = rrule.rrulestr(z, dtstart=seq_start).after(start - timedelta(1), inc=True)
+                rule = rrule.rrulestr(rule_string, dtstart=seq_start)
+                print(rule)
+                try:
+                    test_date = rule.after(start - timedelta(1), inc=True)
+                except TypeError:
+                    continue
                 if not test_date:
                     continue  #No instances of this recurring event in our window, so go to next event
         except KeyError:
@@ -143,7 +155,7 @@ for try_event in agenda:
 count = 0
 for lines in display_lines:
     lines=lines.decode('utf-8')
-    print lines
+#    print lines
     output = output.replace('agenda' + str(count) + ':', cgi.escape(lines))
     count+=1
     if (count == 50):
