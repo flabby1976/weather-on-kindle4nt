@@ -1,173 +1,268 @@
-from icalendar import Calendar
-import datetime
-from datetime import time, timedelta
-import urllib2
-import codecs
-import dateutil.rrule as rrule
-from pytz import timezone
-import textwrap
+#!/bin/sh
 
-def make_local(test_date):
-    try:
-        x = test_date.tzinfo
-        new_date=test_date.astimezone(localtz)
-    except AttributeError: 
-        new_date = datetime.datetime.combine(test_date,midnight_local)
-#    print new_date
-    return new_date
+#
+# Copyright (c) 2013 Uli Fuchs <ufuchs@gmx.com>
+# Released under the terms of the MIT License
+#
 
-import sys
-# get filenames
-infile = sys.argv[1]
-outfile = sys.argv[2]
+cd "$(dirname "$0")"
 
-import ssl
-import cgi
+BASE="$(pwd)"
 
-# This allows the kindle to access https:// 
-context = ssl._create_unverified_context()
+BIN_DIR="$BASE/bin"
+TMP_DIR="/tmp"
 
-#get options
-import yaml
-configs = yaml.safe_load(file('weather.conf.new','r'))
-ICAL_URLS = configs['ICAL_URLS']
-localtz=timezone(configs['localtz'])
+WEATHER_FILE_DIR="$TMP_DIR/weather"
+WEATHER_FILE_NAME="weather.png"
+WEATHER_FILE="$WEATHER_FILE_DIR/$WEATHER_FILE_NAME"
+WEATHER_FILE_DOWNLOADED="$TMP_DIR/$WEATHER_FILE_NAME"
 
-# set local timezone
-start=datetime.datetime.now(localtz)
-localtz=start.tzinfo
+DIAGS_ACTIVE="$TMP_DIR/diags_active"
 
-utctz = timezone('UTC')
-midnight_utc=time(0,0,0,tzinfo=utctz)
-midnight_local=time(0,0,0,tzinfo=localtz)
+FLIGHTMODE_ON=1
+WLAN_UNAVAILABLE=2
+SERVICE_UNAVAILABLE=8
+WEATHER_OUTDATED=16
 
-start = datetime.date.today()
-start = datetime.datetime.combine(start, midnight_local)
+PLEASE_WAIT_PNG="$BASE/img/please-wait.png"
+FLIGHTMODE_ON_PNG="$BASE/img/flightmode-on.png"
+WLAN_UNAVAILABLE_PNG="$BASE/img/wlan-unavailable.png"
+WEATHER_OUTDATED_PNG="$BASE/img/weather-outdated.png"
 
-print("Start: ", start)
+. "$BIN_DIR/weatherProperties.sh"
+. "$BIN_DIR/platform.sh"
 
-#start = datetime.datetime(myday.year, myday.month, myday.day, tzinfo=localtz)
-end = start + timedelta(1)
-nextweek = start + timedelta(21)
+#
+# @param1 weather file name
+#
+getFileAge () {
 
-print("Next week: ", nextweek)
+    fileName="$1"
+    [ -e "$fileName" ] && echo "$(stat -c %Y $fileName)" || echo "0"
 
-agenda=[]
+}
 
-for ICAL_URL in ICAL_URLS:
+#
+#
+isWeatherFileOutDated () {
 
-    print("Downloading: ", ICAL_URL)
+    local fileAge=$(getFileAge "$WEATHER_FILE")
 
-    try:
-        cal_xml = urllib2.urlopen(ICAL_URL, context=context).read()
-    except urllib2.HTTPError:
-        print('URL error: '+ ICAL_URL)
-        continue # skip URL with errors
+    local to=$(getTodaysDayEnd)
 
-    try:
-        cal = Calendar.from_ical(cal_xml)
-    except ValueError:
-        continue # skip files with errors
+    local from=$(($to - 86399))
 
-    print("Download successfull")
+    # 00:00:00 <= fileage <= 23:59:59 ? false : true
+    ([ $from -le $fileAge ] && [ $fileAge -le $to ]) && echo 0 || echo 1
 
-    for component in cal.walk('vevent'):
+}
 
-        test_events=[]
+#
+# calculate the next possible update interval to be at time at 00:10 o'clock
+#
+# @return int - time in seconds upto the next possible sync point
+calcUpdateIntervall () {
 
-    #Ignore those events with no text in the summary
-        try:
-            what=component.decoded("SUMMARY")
-        except KeyError:
-            continue # goes to next component in cal.walk
+    local to=$(getTodaysDayEnd)   #  last second of the current day in epoch
+    
+    local from=$(($to - 86399))   #  one day is equal to 86400 seconds.
+                                  #  our day ends at 23.59:59
+    
+    local nextDayPlus600=$((to + 601))
+                                  #  at 00:10:00 we would like to see the 
+                                  #+ weather of the current day.
 
-#        print(what)
+    local now=$(date +%s)         #  current timestamp in epoche
+    local last=$nextDayPlus600
+    while [ $((last - UPDATE_INTERVAL)) -gt $now ]; do
+        last=$(($last - $UPDATE_INTERVAL))
+                                  #  get the last possible update time before
+                                  #+ now  
+    done
 
-    #Get the start date/time of the event and duration (if spans more than one days)
-        date_start = component.decoded('DTSTART')
-        all_day =  not ( type(date_start) is datetime.datetime)
-        try:
-            date_end = component.decoded('DTEND')
-        except KeyError:
-            date_end = date_start
+    res=$(($now - $last))
 
-        test_start=make_local(date_start)
-        test_end=make_local(date_end)
-         
-        duration = test_end.timetuple().tm_yday - test_start.timetuple().tm_yday 
+    [ $res -le 0 ] && {
+        # 22:20 > 21:20 
+        res=$(($res * -1))
+    } || {
+        # 21:20 <= 18:10 
+        res=$(($UPDATE_INTERVAL - $res))        
+    }
 
-        if all_day:
-            duration-=1
+    echo $res
 
-        test_date=test_start
-        
-    #Check if the event is recurring. If so find the startdate of the occurance immediately after the start of our window of interest
-        try:
-            if component['RRULE']:
-                rule_string=component['RRULE'].to_ical()
-                print("recurring: ", rule_string)
-                seq_start=test_date
-                rule = rrule.rrulestr(rule_string, dtstart=seq_start)
-                print(rule)
-                try:
-                    test_date = rule.after(start - timedelta(1), inc=True)
-                except TypeError:
-                    continue
-                if not test_date:
-                    continue  #No instances of this recurring event in our window, so go to next event
-        except KeyError:
-            pass #Not recurring
+}
 
-        test_event = {'when': test_date, 'what': component.decoded("SUMMARY"), 'all day': not ( type(date_start) is datetime.datetime )}
-        test_events.append(test_event)
+#
+#
+#
+getWeatherfile () {
 
-        for day_count in range(duration):
-            next = datetime.datetime.combine(test_date.date(),midnight_local)+timedelta(day_count+1)
-            test_event = {'when': next, 'what': component.decoded("SUMMARY")+" (Day "+ str(day_count+2)+"/"+str(duration+1)+")", 'all day': True}
-            test_events.append(test_event)
+	python "$BIN_DIR/weather-script.py" "$BASE/img/weather-script-preprocess.svg" "$TMP_DIR/weather-script-output.svg"
 
-    #Check if event is within our window of interest
-        for test_event in test_events:
-##            if( test_event['when'].timetuple().tm_year == start.timetuple().tm_year ) or ( test_event['when'].timetuple().tm_year == nextweek.timetuple().tm_year ):
-##                if( test_event['when'].timetuple().tm_yday >= start.timetuple().tm_yday ) and (test_event['when'].timetuple().tm_yday <= nextweek.timetuple().tm_yday ):
-##                    agenda.append(test_event)
-                diff_time = test_event['when'] - start
-                if (diff_time >= datetime.timedelta(0)) and (diff_time < datetime.timedelta(20)) :
-                    agenda.append(test_event)
-                    print(test_event)
+	python "$BIN_DIR/parse_ical.py" "$TMP_DIR/weather-script-output.svg" "$TMP_DIR/ical-script-output.svg"
 
-#sort by date
-agenda = sorted(agenda, key=lambda k: k['when']) 
+	/mnt/us/weather/bin/rsvg-convert --background-color=white -f png -o "$TMP_DIR/ical-script-output.png" "$TMP_DIR/ical-script-output.svg"
+	/mnt/us/weather/bin/pngcrush -qf -c 0 "$TMP_DIR/ical-script-output.png" "$WEATHER_FILE"
 
-output = codecs.open(infile, 'r', encoding='utf-8').read()
+	local res=$?
 
-display_lines=[]
+    echo $res
 
-thisday=start.strftime("%a")
-for try_event in agenda:
-    try_day=try_event['when'].strftime("%a")
-    if not(try_day==thisday):
-        display_lines += [""]
-        display_lines += [try_day]
-        thisday=try_day
-    if try_event['all day']:
-        agenda_entry  = try_event['what']
-    else:
-        agenda_entry  = try_event['when'].strftime("%H:%M") + ': ' +  try_event['what']
+}
 
-    display_lines += textwrap.fill(agenda_entry, width=30, initial_indent='', subsequent_indent='  ').splitlines()
+#
+#
+#
+checkPrerequests () {
 
-count = 0
-for lines in display_lines:
-    lines=lines.decode('utf-8')
-#    print lines
-    output = output.replace('agenda' + str(count) + ':', cgi.escape(lines))
-    count+=1
-    if (count == 50):
-        break
+    local res=0
 
-for count in range(16):
-    output = output.replace('agenda' + str(count) + ':','')
+    [ $(isAeroplaneModeOn) -eq 1 ] && {
+        res=$FLIGHTMODE_ON
+    }
 
-    # Write output
-codecs.open(outfile, 'w', encoding='utf-8').write(output)
+    [  $(isWlanAvailable) -eq 0 ] && {
+        res=$WLAN_UNAVAILABLE
+    }
+
+    echo $res
+
+}
+
+#
+# @param1 integer errorCode
+# @return string - filename of info image
+#
+errCodeToImgFilename () {
+
+    case "$1" in
+
+        $FLIGHTMODE_ON )
+            echo "$FLIGHTMODE_ON_PNG"
+            ;;
+        $WLAN_UNAVAILABLE )
+            echo "$WLAN_UNAVAILABLE_PNG"
+            ;;
+        $WEATHER_OUTDATED )
+            echo "$WEATHER_OUTDATED_PNG"
+            ;;
+    esac
+
+}
+
+#
+#
+#
+printInfoScreen () {
+    local imgFilename="$(errCodeToImgFilename $1)"
+    printScreen "$imgFilename"   # print the info PNG
+}
+
+#
+#
+#
+init () {
+	printScreen "$PLEASE_WAIT_PNG"
+
+    weatherProperties_init "$BASE/weather.conf"
+
+    mkdir -p "$WEATHER_FILE_DIR" > /dev/null
+
+}
+
+################################################################################
+# entry
+################################################################################
+
+set -x
+
+START=0
+CHECK_PRE=3
+CHECK_OUTDATED=4
+FAILED=6
+DOWNLOAD=9
+PRINTSCREEN=12
+WAIT=15
+
+STATE=$START
+
+while :; do
+
+    case $STATE in
+
+        # read env
+        $START )
+
+            init
+
+            STATE=$CHECK_PRE
+            ;;
+
+        # check network connectivity
+        $CHECK_PRE )
+
+            res=$(checkPrerequests)
+
+            [ $res -eq 0 ] && {
+                STATE=$DOWNLOAD
+            } || {
+
+                # at least one pre request failed.
+                [ ! -e "$DIAGS_ACTIVE" ] && {
+                    STATE=$CHECK_OUTDATED            
+                } || {
+                    # run once in 'diag' mode
+                    printInfoScreen $res
+                    STATE=$WAIT
+                }
+
+            }
+
+          ;;
+
+        # check the expire date of weather file
+        $CHECK_OUTDATED )
+
+            [ $(isWeatherFileOutDated) -eq 0 ] && {
+                STATE=$PRINTSCREEN           # weather file still valid
+            } || {
+                printInfoScreen $WEATHER_OUTDATED
+                sec=$(calcUpdateIntervall)
+                STATE=$WAIT
+            }
+            ;;
+
+        # download the weather file
+        $DOWNLOAD )
+
+            [ $(getWeatherfile) -eq 0 ] && {
+                STATE=$PRINTSCREEN
+            } || {
+                STATE=$CHECK_OUTDATED
+            }  
+            ;;
+
+        # draw the weather file
+        $PRINTSCREEN )
+            printScreen "$WEATHER_FILE"
+            sec=$(calcUpdateIntervall)
+            [ "$INDICATORS" -gt 0 ] && {
+                printBatteryIndicator
+                printAdjustedUpdateInterval "$sec"
+            }
+            STATE=$WAIT
+            ;;
+
+        # take a nap
+        $WAIT )
+
+            $WAITSTRATEGY $sec
+
+            STATE=$CHECK_PRE
+            ;;
+
+    esac
+
+done
