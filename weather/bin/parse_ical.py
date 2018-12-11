@@ -50,6 +50,8 @@ print("Start: ", start)
 end = start + timedelta(1)
 nextweek = start + timedelta(21)
 
+print("Next week: ", nextweek)
+
 agenda=[]
 
 for ICAL_URL in ICAL_URLS:
@@ -79,7 +81,7 @@ for ICAL_URL in ICAL_URLS:
         except KeyError:
             continue # goes to next component in cal.walk
 
-        print(what)
+#        print(what)
 
     #Get the start date/time of the event and duration (if spans more than one days)
         date_start = component.decoded('DTSTART')
@@ -126,8 +128,11 @@ for ICAL_URL in ICAL_URLS:
 
     #Check if event is within our window of interest
         for test_event in test_events:
-            if( test_event['when'].timetuple().tm_year == start.timetuple().tm_year ):
-                if( test_event['when'].timetuple().tm_yday >= start.timetuple().tm_yday ) and (test_event['when'].timetuple().tm_yday <= nextweek.timetuple().tm_yday ):
+##            if( test_event['when'].timetuple().tm_year == start.timetuple().tm_year ) or ( test_event['when'].timetuple().tm_year == nextweek.timetuple().tm_year ):
+##                if( test_event['when'].timetuple().tm_yday >= start.timetuple().tm_yday ) and (test_event['when'].timetuple().tm_yday <= nextweek.timetuple().tm_yday ):
+##                    agenda.append(test_event)
+                diff_time = test_event['when'] - start
+                if (diff_time >= datetime.timedelta(0)) and (diff_time < datetime.timedelta(20)) :
                     agenda.append(test_event)
                     print(test_event)
 
@@ -166,4 +171,3 @@ for count in range(16):
 
     # Write output
 codecs.open(outfile, 'w', encoding='utf-8').write(output)
-
