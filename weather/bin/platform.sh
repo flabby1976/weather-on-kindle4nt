@@ -147,8 +147,8 @@ printBatteryIndicator_onKindle () {
 	capacity=${capacity%%\%*}
 
 	local curr=$(cat "$battery"/battery_current)
-	eips 1 39 "Batt:          "
-	eips 1 39 "Batt: $capacity/$curr"mA
+	eips 38 39 "Batt:          "
+	eips 38 39 "Batt: $capacity"
 
 }
 
@@ -189,8 +189,9 @@ printAdjustedUpdateInterval_onHost () {
 # rigth lower corner
 #
 printAdjustedUpdateInterval_onKindle () {
-	eips 38 39 "Wait:      "
-	eips 38 39 "Wait: $1"	
+	local rnow=$(date +%c)
+	eips 1 39 "           "
+	eips 1 39 "$rnow"	
 }
 
 #

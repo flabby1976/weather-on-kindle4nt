@@ -94,7 +94,7 @@ except IndexError:
 		feel_temp = dom.getElementsByTagName('currentConditions')[0].getElementsByTagName('humidex')[0].childNodes[0].data
 		feel_temp = str(int(round(float(feel_temp))))
 	except IndexError:
-		feel_temp = '**'
+		feel_temp = curr_temp
 	
 #Get weather forecast elements
 xml_forecasts = dom.getElementsByTagName('forecastGroup')[0].getElementsByTagName('forecast')
