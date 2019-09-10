@@ -172,6 +172,19 @@ init () {
 
 }
 
+#
+#
+#
+checkBatteryOK () {
+
+	local minbattery = 10
+	local capacity = $(getBatteryCapacity)
+
+#	[ $capacity -gt $minbattery ]
+
+	echo 1 
+}
+
 ################################################################################
 # entry
 ################################################################################
@@ -188,7 +201,7 @@ WAIT=15
 
 STATE=$START
 
-while :; do
+while [ $(checkBatteryOK) ]; do
 
     case $STATE in
 
@@ -264,5 +277,7 @@ while :; do
             ;;
 
     esac
+
+
 
 done

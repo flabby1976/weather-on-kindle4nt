@@ -125,6 +125,36 @@ printScreen_onKindle () {
 #
 #
 #
+getBatteryCapacity_onHost() {
+
+	echo 100
+
+}
+
+
+#
+#
+#
+getBatteryCapacity_onKindle() {
+
+	#  path to battery properties
+	local battery="/sys/devices/system/yoshi_battery/yoshi_battery0"
+
+	# capacity in procent
+	# lipc-get-prop com.lab126.powerd battLevel
+	local capacity=$(cat "$battery"/battery_capacity) 
+
+	#  remove trailing percent sign.
+	#  this percent sign causes an interruption in the output and cut off the remaining string.
+	capacity=${capacity%%\%*}
+
+	echo $capacity
+}
+
+
+#
+#
+#
 printBatteryIndicator_onHost () {
 	echo "Batt: 100"
 }
@@ -134,19 +164,8 @@ printBatteryIndicator_onHost () {
 #
 printBatteryIndicator_onKindle () {
 
-	#  path to battery properties
-	local battery="/sys/devices/system/yoshi_battery/yoshi_battery0"
+	local capacity = $(getBatteryCapacity_onKindle)
 
-	# capacity in procent
-	# lipc-get-prop com.lab126.powerd battLevel
-	local capacity=$(cat "$battery"/battery_capacity) 
-	# line=$(echo $line | sed -e 's/^[ 	]*//g' -e 's/#.*//' -e 's/[ 	]*$//g')
-
-	#  remove trailing percent sign.
-	#  this percent sign causes an interruption in the output and cut off the remaining string.
-	capacity=${capacity%%\%*}
-
-	local curr=$(cat "$battery"/battery_current)
 	eips 38 39 "Batt:          "
 	eips 38 39 "Batt: $capacity"
 
@@ -290,6 +309,13 @@ getTodaysDayEnd () {
 printScreen () {
 	printScreen_"$PLATFORM" "$1"
 }
+
+#
+#
+#
+getBatteryCapacity () {
+	getBatteryCapacity_"$PLATFORM"
+)
 
 #
 #
