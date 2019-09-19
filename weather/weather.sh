@@ -177,12 +177,16 @@ init () {
 #
 checkBatteryOK () {
 
-	local minbattery = 10
-	local capacity = $(getBatteryCapacity)
+	local minbattery=15
+	local capacity=$(getBatteryCapacity)
 
-#	[ $capacity -gt $minbattery ]
+	local flag=0
 
-	echo 1 
+	if [ $capacity -lt $minbattery ]; then
+		flag=1
+	fi
+
+	return $flag
 }
 
 ################################################################################
@@ -201,7 +205,7 @@ WAIT=15
 
 STATE=$START
 
-while [ $(checkBatteryOK) ]; do
+while checkBatteryOK; do
 
     case $STATE in
 
