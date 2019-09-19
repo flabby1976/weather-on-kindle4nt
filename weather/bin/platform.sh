@@ -315,7 +315,7 @@ printScreen () {
 #
 getBatteryCapacity () {
 	getBatteryCapacity_"$PLATFORM"
-)
+}
 
 #
 #
