@@ -164,7 +164,7 @@ printBatteryIndicator_onHost () {
 #
 printBatteryIndicator_onKindle () {
 
-	local capacity = $(getBatteryCapacity_onKindle)
+	local capacity=$(getBatteryCapacity_onKindle)
 
 	eips 38 39 "Batt:          "
 	eips 38 39 "Batt: $capacity"
