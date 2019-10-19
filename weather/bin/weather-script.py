@@ -64,8 +64,12 @@ configs = yaml.safe_load(file('weather.conf.new','r'))
 #Code of my city
 CODE = configs['CODE']
 
+import ssl
+# This allows the kindle to access https:// 
+context = ssl._create_unverified_context()
+
 #url for Environment Canada
-url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/" + CODE + ".xml"
+url = "https://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/" + CODE + ".xml"
 
 #Num days to extract
 days=4
@@ -77,7 +81,7 @@ lows = [None]*days
 icons = [None]*days
 
 #read the weather XML
-weather_xml = urllib2.urlopen(url).read()
+weather_xml = urllib2.urlopen(url, context=context).read()
 dom = minidom.parseString(weather_xml)
 
 #Get current conditions
