@@ -69,7 +69,7 @@ import ssl
 context = ssl._create_unverified_context()
 
 #url for Environment Canada
-url = "https://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/" + CODE + ".xml"
+url = "https://dd.weather.gc.ca/citypage_weather/xml/" + CODE + ".xml"
 
 #Num days to extract
 days=4
