@@ -1,8 +1,8 @@
 # Weather data taken from the 'Environment and Climate Change Canada' citypage weather XML files
-# http://dd.weatheroffice.ec.gc.ca/citypage_weather/docs/README_citypage_weather.txt
+# http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
 #
 # The codes for the supported cities are given in 
-# http://dd.weatheroffice.ec.gc.ca/citypage_weather/docs/site_list_provinces_en.csv
+# http://dd.weather.gc.ca/citypage_weather/docs/site_list_provinces_en.csv
 # 
 # Code for my city 
 #
